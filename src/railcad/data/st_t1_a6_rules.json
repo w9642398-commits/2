@@ -1,0 +1,28 @@
+{
+  "radius_limits": {
+    "default_min_radius_m": 300.0,
+    "speed_bands": [
+      {"max_speed_kmh": 80.0, "min_radius_m": 300.0},
+      {"max_speed_kmh": 120.0, "min_radius_m": 600.0},
+      {"max_speed_kmh": 160.0, "min_radius_m": 1200.0}
+    ]
+  },
+  "transition_length_limits": {
+    "min_length_m": 30.0,
+    "factor_by_speed": 0.4
+  },
+  "tangent_insertion_limits": {
+    "min_length_m": 20.0
+  },
+  "cant_limits": {
+    "max_cant_mm": 180.0,
+    "max_cant_gradient_mm_per_m": 2.5
+  },
+  "vertical_geometry_limits": {
+    "max_gradient_permille": 25.0,
+    "min_vertical_curve_length_m": 40.0
+  },
+  "turnout_context_rules": {
+    "min_station_separation_m": 15.0
+  }
+}
