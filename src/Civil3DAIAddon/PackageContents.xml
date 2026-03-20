@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage
+  SchemaVersion="1.0"
+  AutodeskProduct="Civil3D"
+  ProductType="Application"
+  Name="Civil3DAIAddon"
+  Description="AI-powered addon for Autodesk Civil 3D 2026"
+  AppVersion="1.0.0"
+  Author="Civil3D AI Addon Team"
+  HelpFile=""
+  OnlineDocumentation=""
+  Icon="">
+
+  <CompanyDetails
+    Name="Civil3D AI"
+    Url=""
+    Email="" />
+
+  <RuntimeRequirements
+    OS="Win64"
+    Platform="Civil3D"
+    SeriesMin="R25.0"
+    SeriesMax="R25.0" />
+
+  <Components>
+    <ComponentEntry
+      AppName="Civil3DAIAddon"
+      Version="1.0.0"
+      ModuleName="./Contents/Civil3DAIAddon.dll"
+      AppType="Managed"
+      LoadOnAutoCADStartup="True"
+      LoadOnCommandInvocation="False">
+      <Commands>
+        <Command Local="AICIVIL_OPEN" Global="AICIVIL_OPEN" />
+        <Command Local="AICIVIL_ANALYZE" Global="AICIVIL_ANALYZE" />
+        <Command Local="AICIVIL_DRYRUN" Global="AICIVIL_DRYRUN" />
+        <Command Local="AICIVIL_EXECUTE" Global="AICIVIL_EXECUTE" />
+        <Command Local="AICIVIL_SETTINGS" Global="AICIVIL_SETTINGS" />
+        <Command Local="AICIVIL_HISTORY" Global="AICIVIL_HISTORY" />
+        <Command Local="AICIVIL_LOGS" Global="AICIVIL_LOGS" />
+      </Commands>
+    </ComponentEntry>
+  </Components>
+
+</ApplicationPackage>
