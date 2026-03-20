@@ -2,6 +2,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.Civil;
 using Autodesk.Civil.DatabaseServices;
 using Civil3DAIAddon.Interfaces;
 using Civil3DAIAddon.Models.AI;
@@ -207,6 +208,231 @@ public sealed class DrawingContextExtractor : IDrawingContextExtractor
                         Name = surface.Name,
                         Style = surface.StyleName,
                         Properties = props
+                    });
+                }
+            }
+
+            // Profiles (from alignments)
+            foreach (ObjectId alignId in civilDoc.GetAlignmentIds())
+            {
+                var alignment = tr.GetObject(alignId, OpenMode.ForRead) as Alignment;
+                if (alignment == null) continue;
+                foreach (ObjectId profId in alignment.GetProfileIds())
+                {
+                    var profile = tr.GetObject(profId, OpenMode.ForRead) as Profile;
+                    if (profile != null)
+                    {
+                        result.Add(new CivilObjectSummary
+                        {
+                            Handle = profile.Handle.ToString(),
+                            Type = "Profile",
+                            Name = profile.Name,
+                            Style = profile.StyleName,
+                            Properties = new Dictionary<string, string>
+                            {
+                                ["AlignmentName"] = alignment.Name,
+                                ["ProfileType"] = profile.ProfileType.ToString(),
+                                ["StartStation"] = profile.StartingStation.ToString("F3"),
+                                ["EndStation"] = profile.EndingStation.ToString("F3")
+                            }
+                        });
+                    }
+                }
+            }
+
+            // Corridors
+            foreach (ObjectId id in civilDoc.CorridorCollection)
+            {
+                var corridor = tr.GetObject(id, OpenMode.ForRead) as Corridor;
+                if (corridor != null)
+                {
+                    result.Add(new CivilObjectSummary
+                    {
+                        Handle = corridor.Handle.ToString(),
+                        Type = "Corridor",
+                        Name = corridor.Name,
+                        Style = corridor.StyleName,
+                        Properties = new Dictionary<string, string>
+                        {
+                            ["BaselineCount"] = corridor.Baselines.Count.ToString()
+                        }
+                    });
+                }
+            }
+
+            // Pipe Networks
+            foreach (ObjectId id in civilDoc.GetPipeNetworkIds())
+            {
+                var network = tr.GetObject(id, OpenMode.ForRead) as Network;
+                if (network != null)
+                {
+                    result.Add(new CivilObjectSummary
+                    {
+                        Handle = network.Handle.ToString(),
+                        Type = "PipeNetwork",
+                        Name = network.Name,
+                        Properties = new Dictionary<string, string>
+                        {
+                            ["PipeCount"] = network.GetPipeIds().Count.ToString(),
+                            ["StructureCount"] = network.GetStructureIds().Count.ToString()
+                        }
+                    });
+                }
+            }
+
+            // Sites and Parcels
+            foreach (ObjectId siteId in civilDoc.GetSiteIds())
+            {
+                var site = tr.GetObject(siteId, OpenMode.ForRead) as Site;
+                if (site != null)
+                {
+                    result.Add(new CivilObjectSummary
+                    {
+                        Handle = site.Handle.ToString(),
+                        Type = "Site",
+                        Name = site.Name,
+                        Properties = new Dictionary<string, string>
+                        {
+                            ["ParcelCount"] = site.GetParcelIds().Count.ToString()
+                        }
+                    });
+
+                    foreach (ObjectId parcelId in site.GetParcelIds())
+                    {
+                        var parcel = tr.GetObject(parcelId, OpenMode.ForRead) as Parcel;
+                        if (parcel != null)
+                        {
+                            result.Add(new CivilObjectSummary
+                            {
+                                Handle = parcel.Handle.ToString(),
+                                Type = "Parcel",
+                                Name = parcel.Name,
+                                Style = parcel.StyleName,
+                                Properties = new Dictionary<string, string>
+                                {
+                                    ["SiteName"] = site.Name,
+                                    ["Area"] = parcel.Area.ToString("F3"),
+                                    ["Perimeter"] = parcel.Perimeter.ToString("F3")
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+
+            // COGO Points (summary only — count + first few)
+            var cogoPointIds = civilDoc.CogoPoints;
+            if (cogoPointIds.Count > 0)
+            {
+                int pointCount = 0;
+                foreach (ObjectId ptId in cogoPointIds)
+                {
+                    if (pointCount >= 50) break; // Limit to avoid context bloat
+                    var pt = tr.GetObject(ptId, OpenMode.ForRead) as CogoPoint;
+                    if (pt != null)
+                    {
+                        result.Add(new CivilObjectSummary
+                        {
+                            Handle = pt.Handle.ToString(),
+                            Type = "CogoPoint",
+                            Name = pt.PointName,
+                            Properties = new Dictionary<string, string>
+                            {
+                                ["PointNumber"] = pt.PointNumber.ToString(),
+                                ["Easting"] = pt.Easting.ToString("F3"),
+                                ["Northing"] = pt.Northing.ToString("F3"),
+                                ["Elevation"] = pt.Elevation.ToString("F3"),
+                                ["Description"] = pt.RawDescription ?? ""
+                            }
+                        });
+                        pointCount++;
+                    }
+                }
+            }
+
+            // Point Groups
+            foreach (ObjectId pgId in civilDoc.PointGroups)
+            {
+                var pg = tr.GetObject(pgId, OpenMode.ForRead) as PointGroup;
+                if (pg != null)
+                {
+                    result.Add(new CivilObjectSummary
+                    {
+                        Handle = pg.Handle.ToString(),
+                        Type = "PointGroup",
+                        Name = pg.Name,
+                        Properties = new Dictionary<string, string>
+                        {
+                            ["PointCount"] = pg.GetPointNumbers().Length.ToString()
+                        }
+                    });
+                }
+            }
+
+            // Assemblies
+            foreach (ObjectId id in civilDoc.AssemblyCollection)
+            {
+                var assembly = tr.GetObject(id, OpenMode.ForRead) as Assembly;
+                if (assembly != null)
+                {
+                    result.Add(new CivilObjectSummary
+                    {
+                        Handle = assembly.Handle.ToString(),
+                        Type = "Assembly",
+                        Name = assembly.Name,
+                        Style = assembly.StyleName,
+                        Properties = new Dictionary<string, string>
+                        {
+                            ["GroupCount"] = assembly.Groups.Count.ToString()
+                        }
+                    });
+                }
+            }
+
+            // Sample Line Groups (from alignments)
+            foreach (ObjectId alignId in civilDoc.GetAlignmentIds())
+            {
+                var alignment = tr.GetObject(alignId, OpenMode.ForRead) as Alignment;
+                if (alignment == null) continue;
+                foreach (ObjectId slgId in alignment.GetSampleLineGroupIds())
+                {
+                    var slg = tr.GetObject(slgId, OpenMode.ForRead) as SampleLineGroup;
+                    if (slg != null)
+                    {
+                        result.Add(new CivilObjectSummary
+                        {
+                            Handle = slg.Handle.ToString(),
+                            Type = "SampleLineGroup",
+                            Name = slg.Name,
+                            Properties = new Dictionary<string, string>
+                            {
+                                ["AlignmentName"] = alignment.Name,
+                                ["SampleLineCount"] = slg.GetSampleLineIds().Count.ToString()
+                            }
+                        });
+                    }
+                }
+            }
+
+            // Feature Lines (iterate model space for FeatureLine entities)
+            var bt = (BlockTable)tr.GetObject(doc.Database.BlockTableId, OpenMode.ForRead);
+            var btr = (BlockTableRecord)tr.GetObject(bt[BlockTableRecord.ModelSpace], OpenMode.ForRead);
+            foreach (ObjectId entId in btr)
+            {
+                var fl = tr.GetObject(entId, OpenMode.ForRead) as FeatureLine;
+                if (fl != null)
+                {
+                    result.Add(new CivilObjectSummary
+                    {
+                        Handle = fl.Handle.ToString(),
+                        Type = "FeatureLine",
+                        Name = fl.Name,
+                        Style = fl.StyleName,
+                        Properties = new Dictionary<string, string>
+                        {
+                            ["Length"] = fl.Length2D.ToString("F3"),
+                            ["PointCount"] = fl.GetPoints(Autodesk.Civil.FeatureLinePointType.AllPoints).Count.ToString()
+                        }
                     });
                 }
             }

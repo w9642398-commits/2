@@ -14,7 +14,7 @@ public sealed class AddonConfiguration
     public string PrimaryModel { get; set; } = "gpt-4.1";
     public string ClassificationModel { get; set; } = "gpt-4.1-mini";
     public int TimeoutSeconds { get; set; } = 120;
-    public int MaxTokens { get; set; } = 16384;
+    public int MaxTokens { get; set; } = 32768;
     public bool DryRunByDefault { get; set; } = true;
     public ConfirmationPolicy ConfirmationPolicy { get; set; } = ConfirmationPolicy.ConfirmDestructive;
     public int MaxContextEntities { get; set; } = 200;

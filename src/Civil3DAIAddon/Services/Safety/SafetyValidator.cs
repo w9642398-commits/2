@@ -8,7 +8,8 @@ public sealed class SafetyValidator : ISafetyValidator
     private static readonly HashSet<string> DestructiveTools = new(StringComparer.OrdinalIgnoreCase)
     {
         "EraseEntity",
-        "RollbackTransaction"
+        "RollbackTransaction",
+        "DeleteLayer"
     };
 
     private static readonly HashSet<string> XrefRelatedKeywords = new(StringComparer.OrdinalIgnoreCase)
