@@ -275,6 +275,7 @@ public sealed class ImportSurveyPointsTool : CadToolBase
 
         var doc = Application.DocumentManager.MdiActiveDocument;
         using var lk = doc.LockDocument();
+        using var tr = doc.TransactionManager.StartTransaction();
 
         try
         {
@@ -286,6 +287,7 @@ public sealed class ImportSurveyPointsTool : CadToolBase
             // Import points using point file format
             civilDoc.CogoPoints.ImportPoints(filePath, format);
 
+            tr.Commit();
             return Task.FromResult(ToolResult.Ok(Name,
                 $"Survey points imported from '{System.IO.Path.GetFileName(filePath)}' using format '{format}'."));
         }

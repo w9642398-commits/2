@@ -383,12 +383,20 @@ public sealed class FilletEntitiesTool : CadToolBase
 
         try
         {
-            // Fillet is best done through the FILLET command with FILLETRAD
-            doc.SendStringToExecute($"FILLETRAD {radius:F6}\n", true, false, false);
-            doc.SendStringToExecute("FILLET\n", true, false, false);
-
-            return Task.FromResult(ToolResult.Ok(Name,
-                $"Fillet initiated with radius {radius}. Select entities to complete."));
+            // Set fillet radius and execute with entity selection via handles
+            doc.SendStringToExecute($"_.FILLETRAD {radius:F6}\n", true, false, false);
+            if (!string.IsNullOrEmpty(entity1Handle) && !string.IsNullOrEmpty(entity2Handle))
+            {
+                doc.SendStringToExecute($"_.FILLET (handent \"{entity1Handle}\") (handent \"{entity2Handle}\")\n", true, false, false);
+                return Task.FromResult(ToolResult.Ok(Name,
+                    $"Fillet executed with radius {radius} between entities {entity1Handle} and {entity2Handle}."));
+            }
+            else
+            {
+                doc.SendStringToExecute("_.FILLET\n", true, false, false);
+                return Task.FromResult(ToolResult.Ok(Name,
+                    $"Fillet initiated with radius {radius}. Select entities to complete."));
+            }
         }
         catch (Exception ex)
         {
@@ -425,6 +433,8 @@ public sealed class ChamferEntitiesTool : CadToolBase
 
     public override Task<ToolResult> ExecuteAsync(Dictionary<string, object> parameters)
     {
+        var entity1Handle = GetParam<string>(parameters, "entity1_handle");
+        var entity2Handle = GetParam<string>(parameters, "entity2_handle");
         var distance1 = GetParam(parameters, "distance1", 5.0);
         var distance2 = GetParam(parameters, "distance2", 5.0);
 
@@ -433,12 +443,20 @@ public sealed class ChamferEntitiesTool : CadToolBase
 
         try
         {
-            doc.SendStringToExecute($"CHAMFERA {distance1:F6}\n", true, false, false);
-            doc.SendStringToExecute($"CHAMFERB {distance2:F6}\n", true, false, false);
-            doc.SendStringToExecute("CHAMFER\n", true, false, false);
-
-            return Task.FromResult(ToolResult.Ok(Name,
-                $"Chamfer initiated with distances {distance1}/{distance2}. Select entities to complete."));
+            doc.SendStringToExecute($"_.CHAMFERA {distance1:F6}\n", true, false, false);
+            doc.SendStringToExecute($"_.CHAMFERB {distance2:F6}\n", true, false, false);
+            if (!string.IsNullOrEmpty(entity1Handle) && !string.IsNullOrEmpty(entity2Handle))
+            {
+                doc.SendStringToExecute($"_.CHAMFER (handent \"{entity1Handle}\") (handent \"{entity2Handle}\")\n", true, false, false);
+                return Task.FromResult(ToolResult.Ok(Name,
+                    $"Chamfer executed with distances {distance1}/{distance2} between entities {entity1Handle} and {entity2Handle}."));
+            }
+            else
+            {
+                doc.SendStringToExecute("_.CHAMFER\n", true, false, false);
+                return Task.FromResult(ToolResult.Ok(Name,
+                    $"Chamfer initiated with distances {distance1}/{distance2}. Select entities to complete."));
+            }
         }
         catch (Exception ex)
         {
@@ -453,6 +471,8 @@ public sealed class ChamferEntitiesTool : CadToolBase
     {
         "type": "object",
         "properties": {
+            "entity1_handle": { "type": "string", "description": "Handle of first entity" },
+            "entity2_handle": { "type": "string", "description": "Handle of second entity" },
             "distance1": { "type": "number", "default": 5.0, "description": "First chamfer distance" },
             "distance2": { "type": "number", "default": 5.0, "description": "Second chamfer distance" }
         }
