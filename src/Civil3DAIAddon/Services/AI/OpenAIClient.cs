@@ -57,7 +57,16 @@ public sealed class OpenAIClient : IOpenAIClient, IDisposable
                 messages,
                 max_tokens = config.MaxTokens,
                 temperature = 0.1,
-                response_format = new { type = "json_object" }
+                response_format = new
+                {
+                    type = "json_schema",
+                    json_schema = new
+                    {
+                        name = "ExecutionPlan",
+                        strict = false,
+                        schema = AIPlanJsonSchema.GetSchema()
+                    }
+                }
             };
 
             var json = JsonConvert.SerializeObject(requestBody);
@@ -130,9 +139,16 @@ public sealed class OpenAIClient : IOpenAIClient, IDisposable
 
         var messages = new List<object>
         {
-            new { role = "system", content = systemPrompt },
-            new { role = "user", content = request.UserPrompt }
+            new { role = "system", content = systemPrompt }
         };
+
+        // Include conversation history for multi-turn context
+        foreach (var msg in request.ConversationHistory.TakeLast(10))
+        {
+            messages.Add(new { role = msg.Role, content = msg.Content });
+        }
+
+        messages.Add(new { role = "user", content = request.UserPrompt });
 
         var requestBody = new
         {
@@ -141,7 +157,16 @@ public sealed class OpenAIClient : IOpenAIClient, IDisposable
             max_tokens = config.MaxTokens,
             temperature = 0.1,
             stream = true,
-            response_format = new { type = "json_object" }
+            response_format = new
+            {
+                type = "json_schema",
+                json_schema = new
+                {
+                    name = "ExecutionPlan",
+                    strict = false,
+                    schema = AIPlanJsonSchema.GetSchema()
+                }
+            }
         };
 
         var json = JsonConvert.SerializeObject(requestBody);
@@ -172,7 +197,17 @@ public sealed class OpenAIClient : IOpenAIClient, IDisposable
             var data = line["data: ".Length..];
             if (data == "[DONE]") break;
 
-            var chunk = JObject.Parse(data);
+            JObject? chunk;
+            try
+            {
+                chunk = JObject.Parse(data);
+            }
+            catch (JsonException)
+            {
+                _logger.LogError("STREAM", "StreamResponseAsync", new InvalidDataException($"Malformed SSE chunk: {data}"));
+                continue;
+            }
+
             var delta = chunk["choices"]?[0]?["delta"]?["content"]?.ToString();
             if (!string.IsNullOrEmpty(delta))
                 yield return delta;
@@ -209,7 +244,11 @@ public sealed class OpenAIClient : IOpenAIClient, IDisposable
             var body = await response.Content.ReadAsStringAsync(ct);
 
             var result = JObject.Parse(body);
-            return result["choices"]?[0]?["message"]?["content"]?.ToString()?.Trim().ToUpperInvariant() ?? "AMBIGUOUS";
+            var category = result["choices"]?[0]?["message"]?["content"]?.ToString()?.Trim().ToUpperInvariant() ?? "AMBIGUOUS";
+
+            // Validate that response is one of the expected categories
+            var validCategories = new HashSet<string> { "DRAW", "CIVIL", "MODIFY", "QUERY", "WORKFLOW", "AMBIGUOUS" };
+            return validCategories.Contains(category) ? category : "AMBIGUOUS";
         }
         catch
         {

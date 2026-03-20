@@ -17,6 +17,8 @@ public sealed class SettingsViewModel : ViewModelBase
     private ConfirmationPolicy _confirmationPolicy;
     private int _maxContextEntities;
     private bool _includeScreenshot;
+    private string _logFilePath = string.Empty;
+    private string _logLevel = "Information";
 
     public SettingsViewModel(IConfigurationService configService)
     {
@@ -83,6 +85,18 @@ public sealed class SettingsViewModel : ViewModelBase
         set => SetProperty(ref _includeScreenshot, value);
     }
 
+    public string LogFilePath
+    {
+        get => _logFilePath;
+        set => SetProperty(ref _logFilePath, value);
+    }
+
+    public string LogLevel
+    {
+        get => _logLevel;
+        set => SetProperty(ref _logLevel, value);
+    }
+
     public string ConnectionStatus { get; private set; } = string.Empty;
 
     public ICommand SaveCommand { get; }
@@ -100,6 +114,8 @@ public sealed class SettingsViewModel : ViewModelBase
         ConfirmationPolicy = _config.ConfirmationPolicy;
         MaxContextEntities = _config.MaxContextEntities;
         IncludeScreenshot = _config.IncludeViewportScreenshot;
+        LogFilePath = _config.LogFilePath;
+        LogLevel = _config.LogLevel;
     }
 
     private void Save()
@@ -112,6 +128,8 @@ public sealed class SettingsViewModel : ViewModelBase
         _config.ConfirmationPolicy = ConfirmationPolicy;
         _config.MaxContextEntities = MaxContextEntities;
         _config.IncludeViewportScreenshot = IncludeScreenshot;
+        _config.LogFilePath = LogFilePath;
+        _config.LogLevel = LogLevel;
 
         if (!string.IsNullOrWhiteSpace(ApiKey))
             _configService.SetApiKey(ApiKey);

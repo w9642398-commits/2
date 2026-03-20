@@ -79,6 +79,22 @@
                     <ComboBoxItem Content="ConfirmDestructive"/>
                     <ComboBoxItem Content="AutoExecute"/>
                 </ComboBox>
+
+                <!-- Logging Settings -->
+                <TextBlock Text="Logging" FontSize="14" FontWeight="SemiBold"
+                           Foreground="#F9E2AF" Margin="0,16,0,8"/>
+
+                <Label Content="Log File Path (optional)"/>
+                <TextBox Text="{Binding LogFilePath}"/>
+
+                <Label Content="Log Level"/>
+                <ComboBox SelectedItem="{Binding LogLevel}" Background="#313244"
+                          Foreground="#CDD6F4" BorderBrush="#45475A">
+                    <ComboBoxItem Content="Debug"/>
+                    <ComboBoxItem Content="Information"/>
+                    <ComboBoxItem Content="Warning"/>
+                    <ComboBoxItem Content="Error"/>
+                </ComboBox>
             </StackPanel>
         </ScrollViewer>
 

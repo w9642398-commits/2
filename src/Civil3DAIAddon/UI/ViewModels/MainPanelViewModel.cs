@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Civil3DAIAddon.Interfaces;
 using Civil3DAIAddon.Models.AI;
 using Civil3DAIAddon.Models.Drawing;
+using Civil3DAIAddon.Services.AI;
 
 namespace Civil3DAIAddon.UI.ViewModels;
 
@@ -23,6 +24,9 @@ public sealed class MainPanelViewModel : ViewModelBase
     private ExecutionReport? _lastReport;
     private string _streamingOutput = string.Empty;
     private string _activePanel = "Chat";
+    private string _drawingSummary = string.Empty;
+    private string _selectionSummary = string.Empty;
+    private string _safetyWarnings = string.Empty;
 
     public MainPanelViewModel(
         IAIOrchestrator orchestrator,
@@ -59,6 +63,37 @@ public sealed class MainPanelViewModel : ViewModelBase
         ConfirmPlanCommand = new AsyncRelayCommand(ConfirmPlanAsync, () => CurrentPlan != null && !IsBusy);
         RollbackCommand = new AsyncRelayCommand(RollbackAsync, () => LastReport != null && !IsBusy);
         ClearChatCommand = new RelayCommand(ClearChat);
+        RefreshContextCommand = new RelayCommand(RefreshContext);
+
+        // Wire up confirmation workflow
+        if (_orchestrator is Services.AI.AIOrchestrator concreteOrchestrator)
+        {
+            concreteOrchestrator.OnConfirmationRequired += async (plan, safety) =>
+            {
+                var tcs = new TaskCompletionSource<bool>();
+                Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    var warnings = safety.Warnings.Count > 0
+                        ? $"\nWarnings:\n- {string.Join("\n- ", safety.Warnings)}"
+                        : "";
+                    var msg = $"Plan: {plan.Intent}\n" +
+                              $"Safety Level: {plan.SafetyLevel}\n" +
+                              $"Steps: {plan.OrderedSteps.Count}{warnings}\n\n" +
+                              "Do you want to proceed?";
+
+                    SafetyWarnings = warnings;
+
+                    var result = System.Windows.MessageBox.Show(
+                        msg, "Confirm Execution",
+                        System.Windows.MessageBoxButton.YesNo,
+                        System.Windows.MessageBoxImage.Question);
+                    tcs.SetResult(result == System.Windows.MessageBoxResult.Yes);
+                });
+                return await tcs.Task;
+            };
+        }
+
+        RefreshContext();
     }
 
     public string PromptText
@@ -115,6 +150,24 @@ public sealed class MainPanelViewModel : ViewModelBase
         set => SetProperty(ref _activePanel, value);
     }
 
+    public string DrawingSummary
+    {
+        get => _drawingSummary;
+        set => SetProperty(ref _drawingSummary, value);
+    }
+
+    public string SelectionSummary
+    {
+        get => _selectionSummary;
+        set => SetProperty(ref _selectionSummary, value);
+    }
+
+    public string SafetyWarnings
+    {
+        get => _safetyWarnings;
+        set => SetProperty(ref _safetyWarnings, value);
+    }
+
     public ObservableCollection<ConversationMessage> ConversationHistory { get; } = new();
     public ObservableCollection<StepExecutionResult> ExecutionSteps { get; } = new();
     public ObservableCollection<LogEntry> LogEntries { get; } = new();
@@ -125,6 +178,7 @@ public sealed class MainPanelViewModel : ViewModelBase
     public ICommand ConfirmPlanCommand { get; }
     public ICommand RollbackCommand { get; }
     public ICommand ClearChatCommand { get; }
+    public ICommand RefreshContextCommand { get; }
 
     private CancellationTokenSource? _cts;
 
@@ -242,10 +296,29 @@ public sealed class MainPanelViewModel : ViewModelBase
         }
     }
 
-    private Task RollbackAsync()
+    private async Task RollbackAsync()
     {
-        StatusText = "Rollback: Use Ctrl+Z (UNDO) in Civil 3D to revert changes.";
-        return Task.CompletedTask;
+        try
+        {
+            var report = await _orchestrator.ExecutePlanAsync(
+                new AIPlan
+                {
+                    Intent = "Rollback",
+                    OrderedSteps = new List<PlannedStep>
+                    {
+                        new() { StepNumber = 1, ToolName = "RollbackTransaction", Parameters = new(), Description = "Undo last operation" }
+                    },
+                    RequiredTools = new List<string> { "RollbackTransaction" },
+                    SafetyLevel = SafetyLevel.Destructive,
+                },
+                ExecutionMode.Execute);
+
+            StatusText = "Rollback executed. You can also use Ctrl+Z for additional undo.";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Rollback failed: {ex.Message}. Use Ctrl+Z in Civil 3D.";
+        }
     }
 
     private void ClearChat()
@@ -257,6 +330,31 @@ public sealed class MainPanelViewModel : ViewModelBase
         CurrentPlan = null;
         LastReport = null;
         StatusText = "Ready";
+    }
+
+    private void RefreshContext()
+    {
+        try
+        {
+            var snapshot = _contextExtractor.ExtractSnapshot(CurrentScope);
+            DrawingSummary = $"File: {snapshot.FileName}\n" +
+                             $"Units: {snapshot.Units}\n" +
+                             $"Layers: {snapshot.Layers.Count}\n" +
+                             $"Total entities: {snapshot.TotalEntityCount}\n" +
+                             $"Civil objects: {snapshot.CivilObjects.Count}";
+
+            var selected = snapshot.SelectedEntities;
+            SelectionSummary = selected.Count > 0
+                ? $"Selected: {selected.Count} entities\n" +
+                  string.Join("\n", selected.Take(10).Select(e => $"  {e.Type} [{e.Handle}] on {e.Layer}"))
+                  + (selected.Count > 10 ? $"\n  ...and {selected.Count - 10} more" : "")
+                : "No selection";
+        }
+        catch
+        {
+            DrawingSummary = "No active document";
+            SelectionSummary = "N/A";
+        }
     }
 
     public void ShowHistoryPanel() => ActivePanel = "History";

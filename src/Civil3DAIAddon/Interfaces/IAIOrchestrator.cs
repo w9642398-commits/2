@@ -10,4 +10,5 @@ public interface IAIOrchestrator
     Task<ExecutionReport> ProcessPromptAsync(string userPrompt, ContextScope scope, ExecutionMode mode, CancellationToken ct = default);
     event Action<string>? OnStreamingToken;
     event Action<string>? OnStatusUpdate;
+    event Func<AIPlan, SafetyValidationResult, Task<bool>>? OnConfirmationRequired;
 }

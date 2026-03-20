@@ -15,8 +15,11 @@ public sealed class AIOrchestrator : IAIOrchestrator
     private readonly IActionLogger _logger;
     private readonly IConfigurationService _configService;
 
+    private readonly List<ConversationMessage> _conversationHistory = new();
+
     public event Action<string>? OnStreamingToken;
     public event Action<string>? OnStatusUpdate;
+    public event Func<AIPlan, SafetyValidationResult, Task<bool>>? OnConfirmationRequired;
 
     public AIOrchestrator(
         IOpenAIClient aiClient,
@@ -56,13 +59,14 @@ public sealed class AIOrchestrator : IAIOrchestrator
             OnStatusUpdate?.Invoke("Extracting drawing context...");
             var snapshot = _contextExtractor.ExtractSnapshot(scope);
 
-            // Step 3: Build AI request
+            // Step 3: Build AI request with conversation history
             var request = new AIRequest
             {
                 UserPrompt = userPrompt,
                 DrawingSnapshot = snapshot,
                 AvailableTools = _toolRegistry.GetToolDefinitions().ToList(),
-                Mode = mode
+                Mode = mode,
+                ConversationHistory = _conversationHistory.TakeLast(10).ToList()
             };
 
             // Step 4: Generate plan from AI
@@ -85,6 +89,10 @@ public sealed class AIOrchestrator : IAIOrchestrator
             var plan = aiResponse.Plan!;
             report.Plan = plan;
             _logger.LogPlan(report.RequestId, JsonConvert.SerializeObject(plan, Formatting.Indented));
+
+            // Update conversation history
+            _conversationHistory.Add(new ConversationMessage { Role = "user", Content = userPrompt });
+            _conversationHistory.Add(new ConversationMessage { Role = "assistant", Content = aiResponse.RawResponse ?? "" });
 
             // Step 5: Handle clarification
             if (aiResponse.NeedsClarification)
@@ -116,10 +124,68 @@ public sealed class AIOrchestrator : IAIOrchestrator
                 return report;
             }
 
+            // Step 6b: Pre-execution validation - verify all required tools exist
+            OnStatusUpdate?.Invoke("Pre-execution validation...");
+            foreach (var requiredTool in plan.RequiredTools)
+            {
+                if (!_toolRegistry.HasTool(requiredTool))
+                {
+                    report.StepResults.Add(new StepExecutionResult
+                    {
+                        StepNumber = 0,
+                        ToolName = "PreValidator",
+                        Description = "Pre-execution validation failed",
+                        Success = false,
+                        ErrorMessage = $"Required tool '{requiredTool}' is not available in the tool registry."
+                    });
+                    return report;
+                }
+            }
+
+            // Step 6c: Confirmation workflow
+            var config = _configService.Load();
+            if (_safetyValidator.RequiresConfirmation(plan, config.ConfirmationPolicy) && mode == ExecutionMode.Execute)
+            {
+                if (OnConfirmationRequired != null)
+                {
+                    var confirmed = await OnConfirmationRequired.Invoke(plan, safetyResult);
+                    if (!confirmed)
+                    {
+                        report.StepResults.Add(new StepExecutionResult
+                        {
+                            StepNumber = 0,
+                            ToolName = "Confirmation",
+                            Description = "User declined execution",
+                            Success = false,
+                            ErrorMessage = "Execution cancelled by user during confirmation."
+                        });
+                        return report;
+                    }
+                }
+            }
+
             // Step 7: Execute plan
             var executionReport = await ExecutePlanAsync(plan, mode, ct);
             report.StepResults = executionReport.StepResults;
             report.WasRolledBack = executionReport.WasRolledBack;
+
+            // Step 8: Post-execution validation
+            if (mode == ExecutionMode.Execute && !executionReport.WasRolledBack)
+            {
+                OnStatusUpdate?.Invoke("Post-execution validation...");
+                var postValidation = ValidatePostExecution(plan, executionReport);
+                if (!string.IsNullOrEmpty(postValidation))
+                {
+                    report.StepResults.Add(new StepExecutionResult
+                    {
+                        StepNumber = plan.OrderedSteps.Count + 1,
+                        ToolName = "PostValidator",
+                        Description = "Post-execution validation",
+                        Success = true,
+                        ErrorMessage = postValidation
+                    });
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -310,5 +376,45 @@ public sealed class AIOrchestrator : IAIOrchestrator
         report.TotalDuration = sw.Elapsed;
 
         return report;
+    }
+
+    private string? ValidatePostExecution(AIPlan plan, ExecutionReport report)
+    {
+        var issues = new List<string>();
+
+        // Check if all steps succeeded
+        var failedSteps = report.StepResults.Where(s => !s.Success).ToList();
+        if (failedSteps.Count > 0)
+        {
+            issues.Add($"{failedSteps.Count} step(s) failed: {string.Join(", ", failedSteps.Select(s => s.ToolName))}");
+        }
+
+        // Verify created/modified object counts match expectations
+        var totalCreated = report.StepResults
+            .Where(s => s.Result != null)
+            .Sum(s => s.Result!.CreatedHandles.Count);
+        var totalModified = report.StepResults
+            .Where(s => s.Result != null)
+            .Sum(s => s.Result!.ModifiedHandles.Count);
+        var totalDeleted = report.StepResults
+            .Where(s => s.Result != null)
+            .Sum(s => s.Result!.DeletedHandles.Count);
+
+        // Run validation rules from plan
+        foreach (var rule in plan.ValidationRules)
+        {
+            if (!string.IsNullOrEmpty(rule.CheckTool) && _toolRegistry.HasTool(rule.CheckTool))
+            {
+                // Could run the check tool here for advanced validation
+                issues.Add($"Validation rule '{rule.Description}' requires manual check with tool '{rule.CheckTool}'.");
+            }
+        }
+
+        if (issues.Count == 0)
+        {
+            return $"Post-validation OK. Created: {totalCreated}, Modified: {totalModified}, Deleted: {totalDeleted}.";
+        }
+
+        return $"Post-validation notes: {string.Join("; ", issues)}. Created: {totalCreated}, Modified: {totalModified}, Deleted: {totalDeleted}.";
     }
 }

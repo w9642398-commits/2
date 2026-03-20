@@ -78,20 +78,28 @@
 
         <!-- Context Bar -->
         <Border Grid.Row="1" Background="#11111B" Padding="8,4">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Scope:" Foreground="#6C7086" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <ComboBox SelectedItem="{Binding CurrentScope}" Width="120" Margin="0,0,10,0">
-                    <ComboBoxItem Content="Selection"/>
-                    <ComboBoxItem Content="ModelSpace"/>
-                    <ComboBoxItem Content="CurrentView"/>
-                    <ComboBoxItem Content="AllDrawing"/>
-                </ComboBox>
-                <TextBlock Text="Mode:" Foreground="#6C7086" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                <ComboBox SelectedItem="{Binding CurrentMode}" Width="100">
-                    <ComboBoxItem Content="DryRun"/>
-                    <ComboBoxItem Content="Execute"/>
-                </ComboBox>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Scope:" Foreground="#6C7086" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <ComboBox SelectedItem="{Binding CurrentScope}" Width="120" Margin="0,0,10,0">
+                        <ComboBoxItem Content="Selection"/>
+                        <ComboBoxItem Content="ModelSpace"/>
+                        <ComboBoxItem Content="CurrentView"/>
+                        <ComboBoxItem Content="AllDrawing"/>
+                    </ComboBox>
+                    <TextBlock Text="Mode:" Foreground="#6C7086" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <ComboBox SelectedItem="{Binding CurrentMode}" Width="100">
+                        <ComboBoxItem Content="DryRun"/>
+                        <ComboBoxItem Content="Execute"/>
+                    </ComboBox>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Refresh" Command="{Binding RefreshContextCommand}"
+                        Style="{StaticResource PanelButton}" Padding="8,2" FontSize="11"/>
+            </Grid>
         </Border>
 
         <!-- Main Content - Tab-like panels -->
@@ -195,6 +203,34 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Context Summary -->
+            <TabItem Header="Context" Background="#313244" Foreground="#CDD6F4">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="Drawing Summary" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="#89B4FA" Margin="0,0,0,6"/>
+                        <Border Background="#313244" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                            <TextBlock Text="{Binding DrawingSummary}" Foreground="#BAC2DE"
+                                       FontFamily="Consolas" FontSize="11" TextWrapping="Wrap"/>
+                        </Border>
+
+                        <TextBlock Text="Selection Summary" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="#89B4FA" Margin="0,0,0,6"/>
+                        <Border Background="#313244" CornerRadius="4" Padding="8" Margin="0,0,0,8">
+                            <TextBlock Text="{Binding SelectionSummary}" Foreground="#BAC2DE"
+                                       FontFamily="Consolas" FontSize="11" TextWrapping="Wrap"/>
+                        </Border>
+
+                        <TextBlock Text="Safety Warnings" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="#F38BA8" Margin="0,0,0,6"/>
+                        <Border Background="#313244" CornerRadius="4" Padding="8">
+                            <TextBlock Text="{Binding SafetyWarnings}" Foreground="#F9E2AF"
+                                       FontFamily="Consolas" FontSize="11" TextWrapping="Wrap"/>
+                        </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
