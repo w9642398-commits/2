@@ -6,7 +6,6 @@ using Autodesk.Civil;
 using Autodesk.Civil.DatabaseServices;
 using Civil3DAIAddon.Interfaces;
 using Civil3DAIAddon.Models.AI;
-using Microsoft.Extensions.Logging;
 
 namespace Civil3DAIAddon.Services.Drawing;
 
