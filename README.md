@@ -47,13 +47,28 @@ Civil3DAIAddon/
 │   │   ├── ToolRegistry.cs
 │   │   ├── CadToolBase.cs             # Abstract base for all tools
 │   │   ├── ToolRegistrationService.cs
-│   │   ├── AutoCAD/                   # AutoCAD tools (create, modify, query)
+│   │   ├── AutoCAD/                   # AutoCAD tools
 │   │   │   ├── QueryTools.cs
 │   │   │   ├── CreationTools.cs
-│   │   │   └── ModificationTools.cs
-│   │   └── Civil3D/                   # Civil 3D tools
+│   │   │   ├── ModificationTools.cs
+│   │   │   ├── AdvancedModificationTools.cs
+│   │   │   ├── LayerTools.cs
+│   │   │   └── DimensionTools.cs
+│   │   └── Civil3D/                   # Civil 3D tools (all areas)
 │   │       ├── CivilCreationTools.cs
-│   │       └── CivilQueryTools.cs
+│   │       ├── CivilQueryTools.cs
+│   │       ├── AlignmentAdvancedTools.cs
+│   │       ├── ProfileAdvancedTools.cs
+│   │       ├── SurfaceAdvancedTools.cs
+│   │       ├── CorridorTools.cs
+│   │       ├── PipeNetworkTools.cs
+│   │       ├── GradingTools.cs
+│   │       ├── SectionTools.cs
+│   │       ├── PointTools.cs
+│   │       ├── ParcelTools.cs
+│   │       ├── IntersectionTools.cs
+│   │       ├── LabelStyleTools.cs
+│   │       └── QtoSurveyTools.cs
 │   ├── Safety/
 │   │   └── SafetyValidator.cs         # Plan and step validation
 │   ├── Configuration/
@@ -185,6 +200,31 @@ Utwórz offset 4.0m od alignmentu "Oś drogi"
 ```
 Creates an offset curve from the alignment.
 
+```
+Utwórz korytarz z alignmentu "Oś drogi", profilu "EG" i assembly "Standardowy"
+```
+Creates a corridor from alignment, profile, and assembly.
+
+```
+Utwórz sieć kanalizacji deszczowej i dodaj studzienki co 50m
+```
+Creates a pipe network with structures at regular intervals.
+
+```
+Oblicz objętości robót ziemnych między powierzchniami "Istniejąca" i "Projektowana"
+```
+Computes cut/fill earthwork volumes between two surfaces.
+
+```
+Utwórz przekroje co 25m wzdłuż osi drogi
+```
+Creates sample lines at 25m intervals and generates cross-section views.
+
+```
+Importuj punkty pomiarowe z pliku survey.csv w formacie PNEZD
+```
+Imports survey points from a CSV file.
+
 ## How It Works
 
 ### Pipeline
@@ -207,23 +247,45 @@ Creates an offset curve from the alignment.
 - Every operation batch has undo scope
 - Full action logging
 
-### Registered Tools (34 total)
+### Registered Tools (100+ total)
 
-**Query (6):** GetActiveDocumentContext, GetCurrentSelection, GetVisibleEntities, QueryEntitiesByType, QueryEntitiesByLayer, QueryCivilObjects
+**AutoCAD Query (6):** GetActiveDocumentContext, GetCurrentSelection, GetVisibleEntities, QueryEntitiesByType, QueryEntitiesByLayer, QueryCivilObjects
 
-**Create (7):** CreateLine, CreatePolyline, CreateArc, CreateCircle, CreateText, CreateMText, CreateBlockReference
+**AutoCAD Create (7):** CreateLine, CreatePolyline, CreateArc, CreateCircle, CreateText, CreateMText, CreateBlockReference
 
-**Modify (7):** MoveEntity, CopyEntity, RotateEntity, EraseEntity, ChangeLayer, SetProperties, ZoomToObjects
+**AutoCAD Modify (7):** MoveEntity, CopyEntity, RotateEntity, EraseEntity, ChangeLayer, SetProperties, ZoomToObjects
+
+**AutoCAD Advanced Modify (10):** MirrorEntity, ScaleEntity, ArrayEntity, OffsetEntity, FilletEntities, ChamferEntities, TrimEntity, ExtendEntity, ExplodeEntity, MeasureDistance
+
+**AutoCAD Layers (5):** CreateLayer, ModifyLayer, DeleteLayer, QueryLayers, SetCurrentLayer
+
+**AutoCAD Dimensions & Annotation (5):** CreateAlignedDimension, CreateLinearDimension, CreateRadialDimension, CreateHatch, CreateLeader
 
 **Transaction (3):** StartUndoScope, CommitTransaction, RollbackTransaction
 
-**Civil 3D Creation (4):** CreateAlignmentFromPolyline, CreateProfile, CreateFeatureLine, CreateSurfaceTin
+**Civil 3D Alignment (12):** CreateAlignmentFromPolyline, CreateAlignmentByLayout, AddAlignmentTangent, AddAlignmentCurve, AddAlignmentSpiral, SetAlignmentSuperelevation, ModifyAlignmentGeometry, CreateOffsetAlignmentIfSupportedByWorkflow, QueryAlignmentGeometry, ExtractStationingData, AnalyzeGeometryContinuity, AddLabelsToAlignment
 
-**Civil 3D Labels (2):** AddLabelsToAlignment, AddLabelsToProfile
+**Civil 3D Profile (8):** CreateProfile, CreateLayoutProfile, AddPVIToProfile, AddVerticalCurve, CreateProfileView, QueryProfileInfo, QueryProfilePVIs, AddLabelsToProfile
 
-**Civil 3D Query (7):** QueryAlignmentGeometry, QuerySurfaceInfo, QueryProfileInfo, QueryParcelInfo, QueryPointGroups, ExtractStationingData, AnalyzeGeometryContinuity
+**Civil 3D Surface (10):** CreateSurfaceTin, AddSurfaceBreaklines, AddSurfaceBoundary, CreateVolumeSurface, AnalyzeSurfaceSlope, GetSurfaceElevationAtPoint, AddPointsToSurface, PasteSurface, ExtractSurfaceContours, QuerySurfaceInfo
 
-**Civil 3D Advanced (1):** CreateOffsetAlignmentIfSupportedByWorkflow
+**Civil 3D Corridor (8):** CreateAssembly, AddSubassembly, CreateCorridor, AddCorridorBaseline, SetCorridorFrequency, ExtractCorridorSurface, RebuildCorridor, QueryCorridorInfo
+
+**Civil 3D Pipe Network (6):** CreatePipeNetwork, AddPipeToNetwork, AddStructureToNetwork, QueryPipeNetwork, CheckPipeInterference, CreatePressureNetwork
+
+**Civil 3D Grading (5):** CreateGradingGroup, CreateGradingBySlope, CreateGradingByDistance, ModifyFeatureLineElevations, CreateFeatureLine
+
+**Civil 3D Section & Sample Lines (5):** CreateSampleLineGroup, CreateSampleLineByStation, CreateSampleLinesAtInterval, CreateSectionView, ComputeMaterialVolumes
+
+**Civil 3D COGO Points (6):** CreateCogoPoint, CreateCogoPoints, ModifyCogoPoint, CreatePointGroup, QueryCogoPoints, QueryPointGroups
+
+**Civil 3D Parcels (5):** CreateSite, CreateParcelBySegments, QueryParcelInfo, QueryParcelDetails, RenumberParcels
+
+**Civil 3D Intersections (3):** CreateIntersection, QueryIntersectionInfo, CreateRoundabout
+
+**Civil 3D Styles & Data Shortcuts (5):** QueryLabelStyles, QueryObjectStyles, SetObjectStyle, CreateDataShortcut, ImportDataReference
+
+**Civil 3D QTO & Survey (6):** ComputeEarthworkVolumes, ComputeAlignmentLengths, ComputeSurfaceArea, ImportSurveyPoints, ExportSurveyPoints, CreateSurveyFigure
 
 ## Configuration
 
@@ -242,29 +304,24 @@ Settings are stored in `%APPDATA%\Civil3DAIAddon\settings.json`. API key is encr
 
 ## Limitations
 
-1. **Civil 3D API coverage** - Some advanced operations (corridors, pipe networks, grading) are not yet implemented as tools. The addon clearly reports unsupported operations.
-2. **Offset alignments** - True offset alignments require corridor workflow; the tool creates offset polylines as an alternative.
-3. **Profile labels** - Profile labeling is driven by label set styles; the tool verifies the profile but doesn't add individual labels programmatically.
-4. **Interactive point picking** - The current version works with coordinate-based parameters. Interactive point picking from the drawing is planned.
-5. **Multi-document** - Operates on the active document only.
-6. **Screenshot context** - Viewport screenshot is optional and used only as supplementary visual context. All operations are data-driven.
-7. **Network dependency** - Requires internet access for OpenAI API calls.
+1. **Offset alignments** - True offset alignments require corridor workflow; the tool creates offset polylines as an alternative.
+2. **Profile labels** - Profile labeling is driven by label set styles; the tool verifies the profile but doesn't add individual labels programmatically.
+3. **Interactive point picking** - The current version works with coordinate-based parameters. Interactive point picking from the drawing is planned.
+4. **Multi-document** - Operates on the active document only.
+5. **Screenshot context** - Viewport screenshot is optional and used only as supplementary visual context. All operations are data-driven.
+6. **Network dependency** - Requires internet access for OpenAI API calls.
+7. **Subassembly catalog** - Subassemblies are added by macro name; custom subassembly development requires Visual Studio.
 
 ## Future Extensions
 
-- Corridor and assembly support
-- Pipe network tools
-- Grading operations
 - Interactive point picking mode
 - Multi-step conversational workflows with result chaining
 - Local LLM support (Ollama, LM Studio)
 - Batch processing mode
 - Custom tool plugin API
-- Style management tools
-- Section view tools
-- Quantity takeoff integration
-- Report generation
+- Report generation (PDF/Excel export)
 - Collaboration features (shared prompt libraries)
+- Vault integration for data management
 
 ## License
 
