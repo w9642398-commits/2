@@ -92,15 +92,11 @@ public sealed class CreateAlignmentFromPolylineTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 
     private static ObjectId GetOrCreateLayer(Database db, Transaction tr, string layerName)
     {
@@ -194,15 +190,11 @@ public sealed class CreateProfileTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 
     private static ObjectId GetOrCreateLayer(Database db, Transaction tr, string layerName)
     {
@@ -439,15 +431,11 @@ public sealed class AddLabelsToAlignmentTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class AddLabelsToProfileTool : CadToolBase
@@ -506,13 +494,9 @@ public sealed class AddLabelsToProfileTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }

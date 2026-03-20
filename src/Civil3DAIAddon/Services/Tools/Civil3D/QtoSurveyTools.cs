@@ -94,11 +94,6 @@ public sealed class ComputeEarthworkVolumesTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class ComputeAlignmentLengthsTool : CadToolBase
@@ -185,11 +180,6 @@ public sealed class ComputeAlignmentLengthsTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class ComputeSurfaceAreaTool : CadToolBase
@@ -251,11 +241,6 @@ public sealed class ComputeSurfaceAreaTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 // ─── Survey Tools ────────────────────────────────────────────────────────────

@@ -79,11 +79,6 @@ public sealed class CreateIntersectionTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 
     private static ObjectId GetOrCreateLayer(Database db, Transaction tr, string layerName)
     {
@@ -155,11 +150,6 @@ public sealed class QueryIntersectionInfoTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class CreateRoundaboutTool : CadToolBase

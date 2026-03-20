@@ -86,7 +86,19 @@ public sealed class AIOrchestrator : IAIOrchestrator
                 return report;
             }
 
-            var plan = aiResponse.Plan!;
+            var plan = aiResponse.Plan;
+            if (plan == null)
+            {
+                report.StepResults.Add(new StepExecutionResult
+                {
+                    StepNumber = 0,
+                    ToolName = "AI",
+                    Description = "Plan generation",
+                    Success = false,
+                    ErrorMessage = "AI returned success but plan was null."
+                });
+                return report;
+            }
             report.Plan = plan;
             _logger.LogPlan(report.RequestId, JsonConvert.SerializeObject(plan, Formatting.Indented));
 

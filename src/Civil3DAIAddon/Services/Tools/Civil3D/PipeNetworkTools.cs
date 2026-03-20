@@ -177,11 +177,6 @@ public sealed class AddPipeToNetworkTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class AddStructureToNetworkTool : CadToolBase
@@ -250,11 +245,6 @@ public sealed class AddStructureToNetworkTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class QueryPipeNetworkTool : CadToolBase
@@ -347,11 +337,6 @@ public sealed class QueryPipeNetworkTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class CheckPipeInterferenceTool : CadToolBase
@@ -430,11 +415,6 @@ public sealed class CheckPipeInterferenceTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class CreatePressureNetworkTool : CadToolBase

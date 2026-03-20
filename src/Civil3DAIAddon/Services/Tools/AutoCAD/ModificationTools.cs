@@ -62,15 +62,11 @@ public sealed class MoveEntityTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class CopyEntityTool : CadToolBase
@@ -136,15 +132,11 @@ public sealed class CopyEntityTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class RotateEntityTool : CadToolBase
@@ -202,15 +194,11 @@ public sealed class RotateEntityTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class EraseEntityTool : CadToolBase
@@ -262,15 +250,11 @@ public sealed class EraseEntityTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class ChangeLayerTool : CadToolBase
@@ -342,15 +326,11 @@ public sealed class ChangeLayerTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class SetPropertiesTool : CadToolBase
@@ -419,15 +399,11 @@ public sealed class SetPropertiesTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class ZoomToObjectsTool : CadToolBase
@@ -490,15 +466,11 @@ public sealed class ZoomToObjectsTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
         try
         {
             var handle = new Handle(Convert.ToInt64(handleStr, 16));
             return db.GetObjectId(false, handle, 0);
         }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class StartUndoScopeTool : CadToolBase

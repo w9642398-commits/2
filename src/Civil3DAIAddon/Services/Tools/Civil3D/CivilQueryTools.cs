@@ -85,11 +85,6 @@ public sealed class QueryAlignmentGeometryTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class QuerySurfaceInfoTool : CadToolBase
@@ -148,11 +143,6 @@ public sealed class QuerySurfaceInfoTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class QueryProfileInfoTool : CadToolBase
@@ -206,11 +196,6 @@ public sealed class QueryProfileInfoTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class QueryParcelInfoTool : CadToolBase
@@ -396,11 +381,6 @@ public sealed class CreateOffsetAlignmentTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class ExtractStationingDataTool : CadToolBase
@@ -464,11 +444,6 @@ public sealed class ExtractStationingDataTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class AnalyzeGeometryContinuityTool : CadToolBase
@@ -563,9 +538,4 @@ public sealed class AnalyzeGeometryContinuityTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }

@@ -84,11 +84,6 @@ public sealed class AddSurfaceBreaklinesTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class AddSurfaceBoundaryTool : CadToolBase
@@ -166,11 +161,6 @@ public sealed class AddSurfaceBoundaryTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class CreateVolumeSurfaceTool : CadToolBase
@@ -257,11 +247,6 @@ public sealed class CreateVolumeSurfaceTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class AnalyzeSurfaceSlopeTool : CadToolBase
@@ -339,11 +324,6 @@ public sealed class AnalyzeSurfaceSlopeTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class GetSurfaceElevationAtPointTool : CadToolBase
@@ -406,11 +386,6 @@ public sealed class GetSurfaceElevationAtPointTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class AddPointsToSurfaceTool : CadToolBase
@@ -474,11 +449,6 @@ public sealed class AddPointsToSurfaceTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class PasteSurfaceTool : CadToolBase
@@ -541,11 +511,6 @@ public sealed class PasteSurfaceTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }
 
 public sealed class ExtractSurfaceContoursTool : CadToolBase
@@ -627,9 +592,4 @@ public sealed class ExtractSurfaceContoursTool : CadToolBase
     }
     """);
 
-    private static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
-    {
-        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
-        catch { return ObjectId.Null; }
-    }
 }

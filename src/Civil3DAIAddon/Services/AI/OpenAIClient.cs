@@ -100,6 +100,10 @@ public sealed class OpenAIClient : IOpenAIClient, IDisposable
             }
 
             var plan = JsonConvert.DeserializeObject<AIPlan>(content);
+            if (plan == null)
+            {
+                return new AIResponse { ErrorMessage = "Failed to deserialize AI plan from response.", RawResponse = content };
+            }
 
             return new AIResponse
             {

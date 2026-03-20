@@ -1,3 +1,4 @@
+using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json.Linq;
 using Civil3DAIAddon.Interfaces;
 using Civil3DAIAddon.Models.AI;
@@ -83,5 +84,11 @@ public abstract class CadToolBase : ICadTool
             }).Where(p => p.Length >= 2).ToList();
 
         return new List<double[]>();
+    }
+
+    protected static ObjectId GetObjectIdFromHandle(Database db, string handleStr)
+    {
+        try { return db.GetObjectId(false, new Handle(Convert.ToInt64(handleStr, 16)), 0); }
+        catch { return ObjectId.Null; }
     }
 }
